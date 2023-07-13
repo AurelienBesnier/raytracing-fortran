@@ -2,9 +2,10 @@ module utils
     use class_vec3
     use class_ray
     use class_image
+    use class_camera
     implicit none
 contains
-    real function hit_sphere(center, radius, r)
+    PURE real function hit_sphere(center, radius, r)
         implicit none
         type(ray), intent(in) :: r
         type(vec3), intent(in) :: center
@@ -24,7 +25,7 @@ contains
 
     end function hit_sphere
 
-    type(vec3) function ray_color(r)
+    PURE type(vec3) function ray_color(r)
         implicit none
         type(ray), intent(in) :: r
         type(vec3) :: unit_dir, N
@@ -38,57 +39,55 @@ contains
             unit_dir = unit_vector(r%direction)
             t = 0.5 * (unit_dir%y + 1.0)
             ray_color%x = (1.0 - t) * 1.0 + t * 0.5
-            ray_color%y = (1.0 - t) * 1.0 + t * 0.7
+            ray_color%y = (1.0 - t) * 1.0 + t * 0.5
             ray_color%z = (1.0 - t) * 1.0 + t * 1.0
         end if
-
     end function ray_color
+
+    real function random_real()
+        random_real = rand()
+    end function random_real
+
 end module utils
 
 
 program raytracing
     use utils
+    use omp_lib
 
     implicit none
 
-    integer :: i, j, ir, ig, ib
+    integer :: i, j, s
     type(vec3) :: color
     type(ray) :: r
     real :: u, v
 
     !-- Image
-    integer :: image_width = 512
+    integer :: image_width = 800
     integer :: image_height
+    integer :: samples_per_pixel = 50
     type(img) :: image_
 
     !-- Camera
-    real :: aspect_ratio = 16.0 / 9.0, viewport_height = 2.0, focal_length = 1.0
-    real :: viewport_width
-    type(vec3) :: origin = vec3(0.0, 0.0, 0.0)
-    type(vec3) :: horizontal
-    type(vec3) :: vertical
-    type(vec3) :: lower_left_corner
-    type(vec3) :: dir_ray
+    type(camera) :: cam
+    cam = create_camera()
 
-    image_height = floor(image_width / aspect_ratio)
+    image_height = floor(image_width / cam%aspect_ratio)
     image_ = create_image(image_width,image_height)
-
-    viewport_width  = aspect_ratio * viewport_height
-    horizontal = vec3(viewport_width, 0.0, 0.0)
-    vertical = vec3(0.0, viewport_height, 0.0)
-    lower_left_corner = minus_vec(minus_vec(minus_vec(origin, div_vec(horizontal,2.0)),&
-     div_vec(vertical,2.0)), vec3(0.0,0.0,focal_length))
-
     do j = image_height-1, 0, -1
         do i = 0, image_width-1
-            u = real(i) / real(image_width - 1.0)
-            v = real(j) / real(image_height - 1.0)
-            dir_ray = minus_vec(add_vec(add_vec(lower_left_corner, mul_vec_d(u, horizontal)), mul_vec_d(v, vertical)),&
-                origin)
-            r = ray(origin, dir_ray)
+            color = vec3(0.0, 0.0, 0.0)
+            !$omp parallel do
+            do s = 0, samples_per_pixel
+                u = real(i + rand()) / real(image_width - 1.0)
+                v = real(j+  rand()) / real(image_height - 1.0)
 
-            color = ray_color(r)
-            call setPixel(j,i,image_,color)
+                r = get_ray(cam, u, v)
+
+                color = add_vec(color, ray_color(r))
+                !call vec3_print(color)
+            end do
+            call setPixel(j,i,image_,color, samples_per_pixel)
 
         end do
     end do

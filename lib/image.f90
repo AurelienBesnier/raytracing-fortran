@@ -18,23 +18,38 @@ contains
         allocate(create_image%pixels(w*3*h*3))
     end function create_image
 
-    integer function getIndex(j,i, imge)
+    PURE integer function getIndex(j,i, imge)
         implicit none
         integer, intent(in) :: j, i
         type(img), intent(in) :: imge
         getIndex = 3 * j * imge%width + i * 3
     end function getIndex
 
-    subroutine setPixel(j, i, imge, rgb)
+    PURE real function clamp(x, min, max)
+        implicit none
+        real, intent(in) :: x, min, max
+        if (x < min) then
+            clamp =  min
+        elseif (x > max) then
+            clamp = max
+        else
+            clamp = x
+        endif
+    end function
+
+
+    subroutine setPixel(j, i, imge, rgb, samples)
         implicit none
         integer, intent(in) :: j, i
         type(vec3), intent(in) :: rgb
         type(img), intent(inout) :: imge
-        integer :: idx
+        integer :: idx, samples
+        real :: scaler
         idx = getIndex(j,i,imge)
-        imge%pixels(idx) = rgb%x
-        imge%pixels(idx+1) = rgb%y
-        imge%pixels(idx+2) = rgb%z
+        scaler = 1.0 / samples
+        imge%pixels(idx) = rgb%x * scaler
+        imge%pixels(idx+1) = rgb%y * scaler
+        imge%pixels(idx+2) = rgb%z * scaler
     end subroutine setPixel
 
     subroutine writePPM(this)
@@ -48,9 +63,9 @@ contains
         do j = this%height-1, 0, -1
             do i = 0, this%width-1
                 idx = getIndex(j,i, this)
-                ir = floor(255.999 *  this%pixels(idx))
-                ig = floor(255.999 *  this%pixels(idx+1))
-                ib = floor(255.999 *  this%pixels(idx+2))
+                ir = floor(256 *  clamp(this%pixels(idx),0.0,0.9999))
+                ig = floor(256 *  clamp(this%pixels(idx+1),0.0,0.9999))
+                ib = floor(256 *  clamp(this%pixels(idx+2),0.0,0.9999))
                 write(10, '(I3, A, I3, A, I3)') ir, ' ', ig, ' ', ib
             end do
         end do

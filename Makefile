@@ -70,7 +70,7 @@ FC = gfortran
 LD = gfortran
 IDIR = 
 CFLAGS = -Wall -g -ffast-math -flto  -J$(OBJS_DIR) $(IDIR)
-LFLAGS = 
+LFLAGS =
 LIBS = 
 
 VPATH = $(SRC_DIR_f90d1):$(OBJS_DIR):$(SRC_DIR_f90d2):$(OBJS_DIR):$(SRC_DIR_modd3):$(OBJS_DIR):$(SRC_DIR_od4):$(OBJS_DIR):$(SRC_DIR_od3):$(OBJS_DIR):$(SRC_DIR_dependd2):$(OBJS_DIR):$(SRC_DIR_layoutd2):$(OBJS_DIR)

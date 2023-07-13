@@ -12,7 +12,7 @@ module class_vec3
     end type vec3
 contains
 
-    real function dot(u, v)
+    PURE real function dot(u, v)
         implicit none
         type(vec3), intent(in) :: u, v
 
@@ -29,7 +29,7 @@ contains
         cross%z = u%x * v%y - v%x * u%y
     end function cross
 
-    real function length_squared(u)
+    PURE real function length_squared(u)
         implicit none
         type(vec3), intent(in) :: u
 
@@ -37,7 +37,7 @@ contains
     end function length_squared
 
 
-    real function length(u)
+    PURE real function length(u)
         implicit none
         type(vec3), intent(in) :: u
 
@@ -55,7 +55,7 @@ contains
         normalize%z = u%z / sqrt(u%z**2)
     end function normalize
 
-    function unit_vector(u)
+    PURE function unit_vector(u)
         implicit none
         type(vec3), intent(in) :: u
         type(vec3) :: unit_vector
@@ -65,7 +65,7 @@ contains
         unit_vector%z = u%z / length(u)
     end function unit_vector
 
-    type(vec3) function minus_vec(u,v)
+    PURE type(vec3) function minus_vec(u,v)
         implicit none
         type(vec3), intent(in) :: u, v
         minus_vec%x = u%x - v%x
@@ -73,7 +73,7 @@ contains
         minus_vec%z = u%z - v%z
     end function minus_vec
 
-    type(vec3) function mul_vec(u,v)
+    PURE type(vec3) function mul_vec(u,v)
         implicit none
         type(vec3), intent(in) :: u, v
         mul_vec%x = u%x - v%x
@@ -81,7 +81,7 @@ contains
         mul_vec%z = u%z - v%z
     end function mul_vec
 
-    type(vec3) function mul_vec_d(t,v)
+    PURE type(vec3) function mul_vec_d(t,v)
         implicit none
         real, intent(in) :: t
         type(vec3), intent(in) :: v
@@ -100,7 +100,7 @@ contains
 
     end function div_vec
 
-    type(vec3) function add_vec(u,v)
+    PURE type(vec3) function add_vec(u,v)
         implicit none
         type(vec3), intent(in) :: u, v
         add_vec%x = u%x + v%x

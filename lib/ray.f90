@@ -9,7 +9,7 @@ module class_ray
         type(vec3) :: direction
     end type ray
 contains
-    type(vec3) function at(r, t)
+    PURE type(vec3) function at(r, t)
         implicit none
         real, intent(in) :: t
         type(ray), intent(in) :: r
